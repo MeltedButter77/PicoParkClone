@@ -43,9 +43,9 @@ class LevelEditor():
                     if event.key == py.K_ESCAPE:
                         return "menu_main"
                     if event.key == py.K_e:
-                        walls_dict = {"walls": []}
+                        info_dict = {"walls": []}
                         for wall in self.walls:
-                            walls_dict["walls"].append({
+                            info_dict["walls"].append({
                                 "x": wall.x,
                                 "y": wall.y,
                                 "width": wall.width,
@@ -54,7 +54,7 @@ class LevelEditor():
 
                         # Write to json
                         with open(self.path + "export.json", "w") as write:
-                            json.dump(walls_dict, write, indent=2)
+                            json.dump(info_dict, write, indent=2)
 
                 if event.type == py.MOUSEBUTTONDOWN:
                     self.mouse_down_pos = event.pos
