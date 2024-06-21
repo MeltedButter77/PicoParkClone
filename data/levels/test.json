@@ -1,0 +1,14 @@
+{
+  "level": {
+    "name": "Emma",
+    "rollNumber": 5
+  },
+  "players": {
+    "name": "Emma",
+    "rollNumber": 5
+  },
+  "objects": [
+    "object",
+    "object"
+  ]
+}

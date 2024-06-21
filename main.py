@@ -1,18 +1,17 @@
 import pygame as py
 import menu
+import level
 
 
 class App():
     def __init__(self):
         py.init()
-        self.screen = py.display.set_mode((1280, 720), py.SCALED | py.RESIZABLE)
-        self.screen_default_res = (1280, 720)
-        self.screen_ratio = self.screen_default_res[0] / self.screen_default_res[1]
+        self.screen = py.display.set_mode((800, 800), py.SCALED)
         self.clock = py.time.Clock()
         self.fps = 60
 
         self.active_game = None
-        self.selected_mode = menu.Menu(self, menu="main_menu").run()
+        self.selected_mode = menu.Menu(self, menu="menu_main").run()
 
     def run(self):
         while True:
@@ -23,13 +22,15 @@ class App():
 
             while True:
                 match self.selected_mode:
-                    case "play":
-                        pass
-                    case "resume":
-                        pass
-                    case "quit":
+                    case "button_quit":
                         py.quit()
                         quit()
+
+                    case str(x) if "play_level_" in x:
+                        self.selected_mode = level.Level(self, self.selected_mode).run()
+
+                    case "option_fullscreen":
+                        self.screen = py.display.set_mode((800, 800), py.FULLSCREEN)
 
                     # if the button does not return an action case
                     # send button's id to the menu selector

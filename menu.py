@@ -1,15 +1,19 @@
 import pygame as py
+import pygame.draw
 
 
 class Button:
-    def __init__(self, screen, x, y, height, width, border, curve, buttonColour, textColour, hoverColour, id, text, font='freesansbold.ttf', font_size=80, font_offset=20):
+    def __init__(self, screen, center_x, center_y, height, width, border, curve, buttonColour, textColour, hoverColour, id, text, font='freesansbold.ttf', font_size=80, text_offset=0):
         py.init()
         py.font.init()
         self.font_size = font_size
         self.font = py.font.Font(font, font_size)
-        self.font_offset = font_offset
+        self.text_offset = text_offset
 
         self.screen = screen
+
+        x = center_x - width / 2
+        y = center_y - height / 2
         self.x = x
         self.y = y
         self.height = height
@@ -24,13 +28,6 @@ class Button:
         self.rect = py.Rect(self.x, self.y, self.width, self.height)
 
         self.highlighted = False
-
-    def update_size(self, app):
-        multi_x = app.screen.get_width() / app.screen_default_res[0]
-        multi_y = app.screen.get_height() / app.screen_default_res[0]
-
-        self.rect = py.Rect(round(self.x * multi_x), round(self.y * multi_y), round(self.width * multi_x), round(self.height * multi_y))
-        self.font.set_point_size(round(self.font_size * multi_x))
 
     def update(self, event):
         if not hasattr(event, "pos"):
@@ -51,58 +48,52 @@ class Button:
 
         if self.text != "":
             text_surf = self.font.render(self.text, True, self.textColour)
-            text_rect = text_surf.get_rect(center=(self.rect.x + self.rect.width // 2, self.rect.y + self.rect.height // 2 + self.font_offset))
+            text_rect = text_surf.get_rect(center=(self.rect.centerx, self.rect.centery + self.text_offset))
             self.screen.blit(text_surf, text_rect)
 
 
 class Menu:
-    def __init__(self, app, menu="main_menu"):
+    def __init__(self, app, menu="menu_main"):
         self.app = app
         screen = app.screen
 
-        if menu == "main_menu":
-            self.buttons = [
-                Button(screen, 600, 250, 100, 200,  0, 7, "dark green", "white", "green", "level_select_menu", "Play"),
-                Button(screen, 225, 400, 100, 350, 0, 7, "dark blue", "white", "blue", "options_menu", "Options"),
-                Button(screen, 300, 550, 100, 200, 0, 7, "dark red", "white", "red", "quit", "Quit"),
+        buttons = {
+            "menu_main": [
+                Button(screen, 400, 200, 150, 350,  0, 35, "dark green", "white", "green", "menu_level_select", "Play", text_offset=5),
+                Button(screen, 400, 400, 150, 350, 0, 35, "dark blue", "white", "blue", "menu_options", "Options", text_offset=5),
+                Button(screen, 400, 600, 150, 350, 0, 35, "dark red", "white", "red", "button_quit", "Quit", text_offset=5),
+            ],
+            "menu_level_select": [
+                Button(screen, 200, 200, 150, 150, 0, 35, "dark green", "white", "green", "play_level_1", "1", font_size=100, text_offset=8),
+                Button(screen, 400, 200, 150, 150, 0, 35, "dark green", "white", "green", "play_level_2", "2", font_size=100, text_offset=8),
+                Button(screen, 600, 200, 150, 150, 0, 35, "dark green", "white", "green", "play_level_2", "2", font_size=100, text_offset=8),
+                Button(screen, 400, 600, 100, 200, 0, 35, "dark red", "white", "red", "menu_main", "Back", font_size=60, text_offset=4),
+            ],
+            "menu_options": [
+                Button(screen, 400, 400, 150, 350, 0, 7, "dark blue", "white", "blue", "option_fullscreen", "Fullscreen", text_offset=5),
+                Button(screen, 400, 600, 150, 350, 0, 7, "dark red", "white", "red", "menu_main", "Back", text_offset=5),
             ]
-            if self.app.active_game:
-                self.buttons.append(Button(screen, 225, 100, 100, 350, 0, 7, "dark green", "white", "green", "resume", "Resume"))
+        }
 
-        elif menu == "level_select_menu":
-            self.buttons = [
-                Button(screen, 50, 50, 150, 150, 0, 7, "dark green", "white", "green", "level_1", "1"),
-                Button(screen, 250, 50, 150, 150, 0, 7, "dark green", "white", "green", "level_2", "2"),
-                Button(screen, 450, 50, 150, 150, 0, 7, "dark green", "white", "green", "level_2", "2"),
-            ]
-
-        elif menu == "options_menu":
-            self.buttons = [
-                Button(screen, 75, 400, 100, 650, 0, 7, "dark blue", "white", "blue", "", "I do nothing lol"),
-                Button(screen, 300, 550, 100, 200, 0, 7, "dark red", "white", "red", "main_menu", "Back"),
-            ]
-
+        if menu in buttons.keys():
+            self.buttons = buttons[menu]
         else:
             self.buttons = []
-
-        for button in self.buttons:
-            button.update_size(self.app)
 
     def run(self):
         if not self.buttons:
             print("Invalid menu")
-            return
+            return "menu_main"
 
         while True:
             for event in py.event.get():
                 if event.type == py.QUIT:
                     py.quit()
                     quit()
-
-                if event.type == py.WINDOWRESIZED:
-                    self.app.screen = py.display.set_mode((event.x, 1/self.app.screen_ratio * event.x), py.SCALED | py.RESIZABLE)
-                    for button in self.buttons:
-                        button.update_size(self.app)
+                if event.type == py.KEYDOWN:
+                    if event.key == py.K_ESCAPE:
+                        py.quit()
+                        quit()
 
                 for button in self.buttons:
                     if button.update(event) and button.id:
