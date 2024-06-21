@@ -3,7 +3,8 @@ import menu
 import game
 import level_editor
 
-class App():
+
+class App:
     def __init__(self):
         py.init()
         self.screen = py.display.set_mode((800, 800), py.SCALED)
