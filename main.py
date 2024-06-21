@@ -10,6 +10,8 @@ class App():
         self.clock = py.time.Clock()
         self.fps = 60
 
+        self.fullscreen = False
+
         self.active_game = None
         self.selected_mode = menu.Menu(self, menu="menu_main").run()
 
@@ -30,7 +32,13 @@ class App():
                         self.selected_mode = game.Game(self).run()
 
                     case "option_fullscreen":
-                        self.screen = py.display.set_mode((800, 800), py.FULLSCREEN)
+                        if not self.fullscreen:
+                            self.screen = py.display.set_mode((800, 800), py.FULLSCREEN | py.SCALED)
+                            self.fullscreen = True
+                        else:
+                            self.screen = py.display.set_mode((800, 800), py.SCALED)
+                            self.fullscreen = False
+                        self.selected_mode = "menu_options"
 
                     # if the button does not return an action case
                     # send button's id to the menu selector

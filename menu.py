@@ -1,8 +1,9 @@
 import pygame as py
 import utils
 
+
 class Button:
-    def __init__(self, screen, center_x, center_y, height, width, border, curve, buttonColour, textColour, hoverColour, id, text, font='freesansbold.ttf', font_size=80, text_offset=0):
+    def __init__(self, screen, center_x, center_y, width, height, border, curve, buttonColour, textColour, hoverColour, id, text, font='freesansbold.ttf', font_size=80, text_offset=0):
         py.init()
         py.font.init()
         self.font_size = font_size
@@ -15,8 +16,8 @@ class Button:
         y = center_y - height / 2
         self.x = x
         self.y = y
-        self.height = height
         self.width = width
+        self.height = height
         self.border = border
         self.curve = curve
         self.buttonColour = buttonColour
@@ -56,56 +57,12 @@ class Menu:
         self.app = app
         screen = app.screen
 
-        # Example in the json file
-        # {
-        #     "menu_main": [
-        #         {
-        #             "x": 0,
-        #             "y": 0,
-        #             "width": 0,
-        #             "height": 0,
-        #             "colour": "green",
-        #             "text": "Play",
-        #             "text_colour": "white",
-        #             "hover_colour": "dark green"
-        #         }
-        #         {
-        #             "x": 0,
-        #         }
-        #     ]
-        # }
         button_info = utils.json_load("data/buttons/buttons.json")[menu]
-
-        print(button_info)
         self.buttons = []
         for button in button_info:
             self.buttons.append(
-                Button(screen, button["x"], button["y"], button["width"], button["height"], button["border"], button["curve"], button["buttonColour"], button["textColour"], button["hoverColour"], button["id"], button["text"])
+                Button(screen, button["x"], button["y"], button["width"], button["height"], button["border"], button["curve"], button["buttonColour"], button["textColour"], button["hoverColour"], button["id"], button["text"], button["font"], button["font_size"], button["text_offset"])
             )
-
-        # Transfer this info to the json file
-        # buttons = {
-        #     "menu_main": [
-        #         Button(screen, 400, 200, 150, 350,  0, 35, "dark green", "white", "green", "menu_level_select", "Play", text_offset=5),
-        #         Button(screen, 400, 400, 150, 350, 0, 35, "dark blue", "white", "blue", "menu_options", "Options", text_offset=5),
-        #         Button(screen, 400, 600, 150, 350, 0, 35, "dark red", "white", "red", "button_quit", "Quit", text_offset=5),
-        #     ],
-        #     "menu_level_select": [
-        #         Button(screen, 200, 200, 150, 150, 0, 35, "dark green", "white", "green", "play_level_1", "1", font_size=100, text_offset=8),
-        #         Button(screen, 400, 200, 150, 150, 0, 35, "dark green", "white", "green", "play_level_2", "2", font_size=100, text_offset=8),
-        #         Button(screen, 600, 200, 150, 150, 0, 35, "dark green", "white", "green", "play_level_2", "2", font_size=100, text_offset=8),
-        #         Button(screen, 400, 600, 100, 200, 0, 35, "dark red", "white", "red", "menu_main", "Back", font_size=60, text_offset=4),
-        #     ],
-        #     "menu_options": [
-        #         Button(screen, 400, 400, 150, 350, 0, 7, "dark blue", "white", "blue", "option_fullscreen", "Fullscreen", text_offset=5),
-        #         Button(screen, 400, 600, 150, 350, 0, 7, "dark red", "white", "red", "menu_main", "Back", text_offset=5),
-        #     ]
-        # }
-
-        # if menu in buttons.keys():
-        #     self.buttons = buttons[menu]
-        # else:
-        #     self.buttons = []
 
     def run(self):
         if not self.buttons:
