@@ -1,0 +1,13 @@
+{
+  "players": [
+    {
+      "id": "player_1",
+      "x": 100,
+      "y": 200,
+      "width": 50,
+      "height": 50,
+      "colour": "red"
+    }
+  ],
+  "walls": []
+}

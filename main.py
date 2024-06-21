@@ -1,7 +1,7 @@
 import pygame as py
 import menu
 import game
-
+import level_editor
 
 class App():
     def __init__(self):
@@ -27,6 +27,10 @@ class App():
                     case "button_quit":
                         py.quit()
                         quit()
+
+                    case "level_editor":
+                        self.active_game = level_editor.LevelEditor(self)
+                        self.selected_mode = self.active_game.run()
 
                     case str(x) if "play_level_" in x:
                         self.active_game = game.Game(self)

@@ -16,7 +16,7 @@ class Game():
         self.keys_pressed = None
 
         self.players = py.sprite.Group()
-        self.objects = py.sprite.Group()
+        self.walls = py.sprite.Group()
 
         for info in self.level["players"]:
             player_obj = player.Player(self, (info["x"], info["y"]), (info["width"], info["height"]), ["colour"], self.players)

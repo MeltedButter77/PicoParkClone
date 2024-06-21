@@ -161,6 +161,22 @@
       "font": "freesansbold.ttf",
       "font_size": 80,
       "text_offset": 5
+    },
+    {
+      "x": 700,
+      "y": 730,
+      "width": 150,
+      "height": 80,
+      "border": 0,
+      "curve": 18,
+      "buttonColour": "dark red",
+      "textColour": "white",
+      "hoverColour": "red",
+      "id": "level_editor",
+      "text": "Editor",
+      "font": "freesansbold.ttf",
+      "font_size": 40,
+      "text_offset": 3
     }
   ],
   "menu_options": [
