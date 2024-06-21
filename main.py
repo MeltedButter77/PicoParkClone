@@ -1,6 +1,6 @@
 import pygame as py
 import menu
-import level
+import game
 
 
 class App():
@@ -27,7 +27,7 @@ class App():
                         quit()
 
                     case str(x) if "play_level_" in x:
-                        self.selected_mode = level.Level(self, self.selected_mode).run()
+                        self.selected_mode = game.Game(self).run()
 
                     case "option_fullscreen":
                         self.screen = py.display.set_mode((800, 800), py.FULLSCREEN)

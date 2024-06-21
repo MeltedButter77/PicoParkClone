@@ -1,6 +1,5 @@
 import pygame as py
-import pygame.draw
-
+import utils
 
 class Button:
     def __init__(self, screen, center_x, center_y, height, width, border, curve, buttonColour, textColour, hoverColour, id, text, font='freesansbold.ttf', font_size=80, text_offset=0):
@@ -56,6 +55,9 @@ class Menu:
     def __init__(self, app, menu="menu_main"):
         self.app = app
         screen = app.screen
+
+        #buttons = utils.json_load("data/buttons")
+        # still working
 
         buttons = {
             "menu_main": [
