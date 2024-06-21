@@ -29,7 +29,8 @@ class App():
                         quit()
 
                     case str(x) if "play_level_" in x:
-                        self.selected_mode = game.Game(self).run()
+                        self.active_game = game.Game(self)
+                        self.selected_mode = self.active_game.run()
 
                     case "option_fullscreen":
                         if not self.fullscreen:

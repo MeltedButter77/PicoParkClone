@@ -9,6 +9,7 @@ class Game():
         self.level = utils.json_load("data/levels/level_" + app.selected_mode.split("_")[2] + ".json")
 
         self.dt = 1
+        self.keys_pressed = None
 
         self.players = py.sprite.Group()
         self.objects = py.sprite.Group()
@@ -32,8 +33,9 @@ class Game():
                         return "menu_main"
 
             ### LOGIC ###
-            keys_pressed = py.key.get_pressed()
-            self.players.update(keys_pressed)
+            self.keys_pressed = py.key.get_pressed()
+
+            self.players.update()
 
             ### RENDER ###
             self.players.draw(self.app.screen)

@@ -14,8 +14,9 @@ class Player(py.sprite.Sprite):
         self.image = py.transform.scale(self.image_original, self.size)
         self.rect = self.image.get_rect(center=self.pos)
 
-    def update(self, keys):
+    def update(self):
         dt = self.game.dt
+        keys = self.game.keys_pressed
 
         if keys[py.K_w]:
             self.pos.y -= 300 * dt
