@@ -8,6 +8,10 @@ class Game():
         self.app = app
         self.level = utils.json_load("data/levels/level_" + app.selected_mode.split("_")[2] + ".json")
 
+        # prevents any failed level load being erred below
+        if not self.level:
+            return
+
         self.dt = 1
         self.keys_pressed = None
 
@@ -20,6 +24,7 @@ class Game():
         #     wall =
 
     def run(self):
+        # If level is not loaded, return to menu
         if not self.level:
             return "menu_main"
 
