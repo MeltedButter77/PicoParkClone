@@ -56,31 +56,56 @@ class Menu:
         self.app = app
         screen = app.screen
 
-        #buttons = utils.json_load("data/buttons")
-        # still working
+        # Example in the json file
+        # {
+        #     "menu_main": [
+        #         {
+        #             "x": 0,
+        #             "y": 0,
+        #             "width": 0,
+        #             "height": 0,
+        #             "colour": "green",
+        #             "text": "Play",
+        #             "text_colour": "white",
+        #             "hover_colour": "dark green"
+        #         }
+        #         {
+        #             "x": 0,
+        #         }
+        #     ]
+        # }
+        button_info = utils.json_load("data/buttons/buttons.json")[menu]
 
-        buttons = {
-            "menu_main": [
-                Button(screen, 400, 200, 150, 350,  0, 35, "dark green", "white", "green", "menu_level_select", "Play", text_offset=5),
-                Button(screen, 400, 400, 150, 350, 0, 35, "dark blue", "white", "blue", "menu_options", "Options", text_offset=5),
-                Button(screen, 400, 600, 150, 350, 0, 35, "dark red", "white", "red", "button_quit", "Quit", text_offset=5),
-            ],
-            "menu_level_select": [
-                Button(screen, 200, 200, 150, 150, 0, 35, "dark green", "white", "green", "play_level_1", "1", font_size=100, text_offset=8),
-                Button(screen, 400, 200, 150, 150, 0, 35, "dark green", "white", "green", "play_level_2", "2", font_size=100, text_offset=8),
-                Button(screen, 600, 200, 150, 150, 0, 35, "dark green", "white", "green", "play_level_2", "2", font_size=100, text_offset=8),
-                Button(screen, 400, 600, 100, 200, 0, 35, "dark red", "white", "red", "menu_main", "Back", font_size=60, text_offset=4),
-            ],
-            "menu_options": [
-                Button(screen, 400, 400, 150, 350, 0, 7, "dark blue", "white", "blue", "option_fullscreen", "Fullscreen", text_offset=5),
-                Button(screen, 400, 600, 150, 350, 0, 7, "dark red", "white", "red", "menu_main", "Back", text_offset=5),
-            ]
-        }
+        print(button_info)
+        self.buttons = []
+        for button in button_info:
+            self.buttons.append(
+                Button(screen, button["x"], button["y"], button["width"], button["height"], button["border"], button["curve"], button["buttonColour"], button["textColour"], button["hoverColour"], button["id"], button["text"])
+            )
 
-        if menu in buttons.keys():
-            self.buttons = buttons[menu]
-        else:
-            self.buttons = []
+        # Transfer this info to the json file
+        # buttons = {
+        #     "menu_main": [
+        #         Button(screen, 400, 200, 150, 350,  0, 35, "dark green", "white", "green", "menu_level_select", "Play", text_offset=5),
+        #         Button(screen, 400, 400, 150, 350, 0, 35, "dark blue", "white", "blue", "menu_options", "Options", text_offset=5),
+        #         Button(screen, 400, 600, 150, 350, 0, 35, "dark red", "white", "red", "button_quit", "Quit", text_offset=5),
+        #     ],
+        #     "menu_level_select": [
+        #         Button(screen, 200, 200, 150, 150, 0, 35, "dark green", "white", "green", "play_level_1", "1", font_size=100, text_offset=8),
+        #         Button(screen, 400, 200, 150, 150, 0, 35, "dark green", "white", "green", "play_level_2", "2", font_size=100, text_offset=8),
+        #         Button(screen, 600, 200, 150, 150, 0, 35, "dark green", "white", "green", "play_level_2", "2", font_size=100, text_offset=8),
+        #         Button(screen, 400, 600, 100, 200, 0, 35, "dark red", "white", "red", "menu_main", "Back", font_size=60, text_offset=4),
+        #     ],
+        #     "menu_options": [
+        #         Button(screen, 400, 400, 150, 350, 0, 7, "dark blue", "white", "blue", "option_fullscreen", "Fullscreen", text_offset=5),
+        #         Button(screen, 400, 600, 150, 350, 0, 7, "dark red", "white", "red", "menu_main", "Back", text_offset=5),
+        #     ]
+        # }
+
+        # if menu in buttons.keys():
+        #     self.buttons = buttons[menu]
+        # else:
+        #     self.buttons = []
 
     def run(self):
         if not self.buttons:
