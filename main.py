@@ -7,7 +7,7 @@ import level_editor
 class App:
     def __init__(self):
         py.init()
-        self.screen = py.display.set_mode((800, 800), py.SCALED)
+        self.screen = py.display.set_mode((800, 600), py.SCALED)
         self.clock = py.time.Clock()
         self.fps = 60
 

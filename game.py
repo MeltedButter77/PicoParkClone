@@ -16,12 +16,13 @@ class Game():
         self.keys_pressed = None
 
         self.players = py.sprite.Group()
-        self.walls = py.sprite.Group()
+        self.walls = []
 
         for info in self.level["players"]:
-            player_obj = player.Player(self, (info["x"], info["y"]), (info["width"], info["height"]), ["colour"], self.players)
-        # for wall_info in self.level["walls"]:
-        #     wall =
+            player_obj = player.Player(self, (info["x"], info["y"]), (info["width"], info["height"]), self.players)
+        for wall_info in self.level["walls"]:
+            wall = py.Rect(wall_info["x"], wall_info["y"], wall_info["width"], wall_info["height"])
+            self.walls.append(wall)
 
     def run(self):
         # If level is not loaded, return to menu
@@ -43,6 +44,8 @@ class Game():
             self.players.update()
 
             ### RENDER ###
+            for wall in self.walls:
+                py.draw.rect(self.app.screen, (0, 0, 0), wall)
             self.players.draw(self.app.screen)
 
             py.display.update()
