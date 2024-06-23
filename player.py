@@ -52,11 +52,12 @@ class Player(py.sprite.Sprite):
             self.collision_check()
 
     def collision_check(self):
-        collide_list = self.rect.collidelistall(self.game.walls)
+        wall_rects = [wall.rect for wall in self.game.walls]
+        collide_list = self.rect.collidelistall(wall_rects)
 
         collide_rects = []
         for i in collide_list:
-            collide_rects.append(self.game.walls[i])
+            collide_rects.append(wall_rects[i])
 
         player_rects = [player.rect for player in self.game.players]
         collide_rects.extend(player_rects)

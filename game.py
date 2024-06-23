@@ -1,6 +1,7 @@
 import pygame as py
 import utils
 import player
+import wall
 
 
 class Game:
@@ -18,7 +19,7 @@ class Game:
         self.keys_pressed = None
 
         self.players = py.sprite.Group()
-        self.walls = []
+        self.walls = py.sprite.Group()
 
         for i, info in enumerate(self.level["players"]):
             controls = None
@@ -36,8 +37,7 @@ class Game:
             else:
                 print("not enough controls defined for player", i + 1)
         for wall_info in self.level["walls"]:
-            wall = py.Rect(wall_info["x"], wall_info["y"], wall_info["width"], wall_info["height"])
-            self.walls.append(wall)
+            wall.Wall(self, (wall_info["x"], wall_info["y"]), (wall_info["width"], wall_info["height"]), self.walls)
 
     def run(self):
         # If level is not loaded, return to menu
@@ -70,10 +70,8 @@ class Game:
             self.players.update()
 
             ### RENDER ###
-            for wall in self.walls:
-                display_rect = wall.copy()
-                display_rect.topleft = [wall[i] - self.camera[i] for i in range(2)]
-                py.draw.rect(self.app.screen, (0, 0, 0), display_rect)
+            for wall_obj in self.walls:
+                wall_obj.draw(self.app.screen, self.camera)
             for player_obj in self.players.sprites():
                 player_obj.draw(self.app.screen, self.camera)
 
