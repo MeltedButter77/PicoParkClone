@@ -23,7 +23,7 @@ def menu(screen):
     screen.blit(menu_opt_a, (100, 200))
     screen.blit(menu_opt_b, (100, 300))
     pygame.display.update()
-    
+
     while True:
         # Handle events.
         for event in pygame.event.get():
@@ -48,7 +48,7 @@ def game(screen):
     screen.blit(game_opt_a, (100, 200))
     screen.blit(game_opt_b, (100, 300))
     pygame.display.update()
-    
+
     while True:
         # Handle events.
         for event in pygame.event.get():
@@ -73,7 +73,7 @@ def shop(screen):
     screen.blit(shop_opt_a, (100, 200))
     screen.blit(shop_opt_b, (100, 300))
     pygame.display.update()
-    
+
     while True:
         # Handle events.
         for event in pygame.event.get():
@@ -86,6 +86,7 @@ def shop(screen):
                 elif event.key == pygame.K_b:  # Go to shop if you press B.
                     scene = "scene_menu"
                     return scene
+
 
 if __name__ == "__main__":
     main()

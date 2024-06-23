@@ -1,6 +1,6 @@
 import json
 
-path = "data/levels/test.json"
+path = "test.json"
 sampleInfo = {
     "level":
         {
