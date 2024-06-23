@@ -90,3 +90,7 @@ class Player(py.sprite.Sprite):
             self.pos = py.Vector2(self.rect.topleft)
 
         self.old_rect = self.rect.copy()
+
+    def draw(self, screen, camera):
+        location = [self.rect[i] - camera[i] for i in range(2)]
+        screen.blit(self.image, location)

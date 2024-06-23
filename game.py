@@ -8,6 +8,8 @@ class Game:
         self.app = app
         self.level = utils.json_load("data/levels/level_" + app.selected_mode.split("_")[2] + ".json")
 
+        self.camera = py.Vector2(0, 0)
+
         # prevents any failed level load being erred below
         if not self.level:
             return
@@ -41,6 +43,7 @@ class Game:
         # If level is not loaded, return to menu
         if not self.level:
             return "menu_main"
+        mouse_down = None
 
         while True:
             for event in py.event.get():
@@ -50,8 +53,16 @@ class Game:
                 if event.type == py.KEYDOWN:
                     if event.key == py.K_ESCAPE:
                         return "menu_main"
-
                     self.players.update(event)
+
+                if event.type == py.MOUSEBUTTONDOWN:
+                    mouse_down = event.pos
+                if event.type == py.MOUSEBUTTONUP:
+                    mouse_down = None
+                if event.type == py.MOUSEMOTION:
+                    if mouse_down:
+                        self.camera.x -= event.rel[0]
+                        self.camera.y -= event.rel[1]
 
             ### LOGIC ###
             self.keys_pressed = py.key.get_pressed()
@@ -60,8 +71,11 @@ class Game:
 
             ### RENDER ###
             for wall in self.walls:
-                py.draw.rect(self.app.screen, (0, 0, 0), wall)
-            self.players.draw(self.app.screen)
+                display_rect = wall.copy()
+                display_rect.topleft = [wall[i] - self.camera[i] for i in range(2)]
+                py.draw.rect(self.app.screen, (0, 0, 0), display_rect)
+            for player_obj in self.players.sprites():
+                player_obj.draw(self.app.screen, self.camera)
 
             # Update screen
             py.display.update()
