@@ -43,7 +43,6 @@ class Game:
         # If level is not loaded, return to menu
         if not self.level:
             return "menu_main"
-        mouse_down = None
 
         while True:
             for event in py.event.get():
@@ -55,24 +54,17 @@ class Game:
                         return "menu_main"
                     self.players.update(event)
 
-                if event.type == py.MOUSEBUTTONDOWN:
-                    mouse_down = event.pos
-                if event.type == py.MOUSEBUTTONUP:
-                    mouse_down = None
-                if event.type == py.MOUSEMOTION:
-                    if mouse_down:
-                        self.camera.x -= event.rel[0]
-                        self.camera.y -= event.rel[1]
-
             ### LOGIC ###
             self.keys_pressed = py.key.get_pressed()
+
+            self.move_camera()
 
             self.players.update()
 
             ### RENDER ###
             for wall_obj in self.walls:
                 wall_obj.draw(self.app.screen, self.camera)
-            for player_obj in self.players.sprites():
+            for player_obj in self.players:
                 player_obj.draw(self.app.screen, self.camera)
 
             # Update screen
@@ -80,3 +72,12 @@ class Game:
             self.app.screen.fill((60, 60, 60))
             self.dt = self.app.clock.tick(self.app.fps) / 1000
             py.display.set_caption("FPS: " + str(int(self.app.clock.get_fps())))
+
+    def move_camera(self):
+        # Calculate average position of all players and set as camera origin
+        total_players_pos = py.Vector2(0, 0)
+        for player_obj in self.players.sprites():
+            total_players_pos += player_obj.pos
+        print(total_players_pos, len(self.players.sprites()))
+        average_pos = total_players_pos / len(self.players.sprites()) - py.Vector2(self.app.screen.get_size()) / 2
+        self.camera = py.Vector2(average_pos)
