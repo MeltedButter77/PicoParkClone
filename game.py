@@ -38,6 +38,9 @@ class Game():
                     if event.key == py.K_ESCAPE:
                         return "menu_main"
 
+                    if event.key == py.K_w:
+                        self.players.update(event)
+
             ### LOGIC ###
             self.keys_pressed = py.key.get_pressed()
 

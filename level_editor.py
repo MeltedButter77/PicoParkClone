@@ -1,6 +1,5 @@
 import pygame as py
 import pygame.mouse
-
 import utils
 import player
 import json

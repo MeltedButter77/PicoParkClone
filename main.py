@@ -39,10 +39,10 @@ class App:
 
                     case "option_fullscreen":
                         if not self.fullscreen:
-                            self.screen = py.display.set_mode((800, 800), py.FULLSCREEN | py.SCALED)
+                            self.screen = py.display.set_mode(self.screen.get_size(), py.FULLSCREEN | py.SCALED)
                             self.fullscreen = True
                         else:
-                            self.screen = py.display.set_mode((800, 800), py.SCALED)
+                            self.screen = py.display.set_mode(self.screen.get_size(), py.SCALED)
                             self.fullscreen = False
                         self.selected_mode = "menu_options"
 
