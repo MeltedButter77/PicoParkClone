@@ -90,6 +90,3 @@ class Player(py.sprite.Sprite):
             self.pos = py.Vector2(self.rect.topleft)
 
         self.old_rect = self.rect.copy()
-
-
-
