@@ -9,7 +9,6 @@ class Wall(py.sprite.Sprite):
         self.pos = py.Vector2(position)
         self.size = py.Vector2(size)
 
-        print(self.pos, self.size)
         self.image_original = py.Surface(self.size)
         self.image = py.transform.scale(self.image_original, self.size)
         self.image.fill((0, 0, 255))
