@@ -43,9 +43,11 @@ class Player(py.sprite.Sprite):
             # Apply velocity accounting for dt
             self.pos += self.vel * dt
 
-            # update rect before collision.
+            # EXPLANATION about order of operations -- update rect before collision.
             # This allows for the use of the rect in collision calculations
-            # If rect was not updated, rounding pos when updating pos after moving rect would cause off-by-1 errors which look jittery
+            # If rect was not updated, when updating pos after moving rect (by setting pos to rect.topleft) pos gets rounded.
+            # This would cause off-by-1 errors which look jittery as the collision would not be detected and after being moved by gravity
+            # it would round to colliding rather than colliding and being moved back.
             self.rect = py.Rect(self.pos.x, self.pos.y, self.size.x, self.size.y)
 
             # Will change velocity depending on collisions
