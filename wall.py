@@ -11,7 +11,7 @@ class Wall(py.sprite.Sprite):
 
         self.image_original = py.Surface(self.size)
         self.image = py.transform.scale(self.image_original, self.size)
-        self.image.fill((0, 0, 255))
+        self.image.fill((0, 0, 0))
 
         self.rect = py.Rect(self.pos.x, self.pos.y, self.size.x, self.size.y)
 
