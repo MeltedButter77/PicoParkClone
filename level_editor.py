@@ -16,7 +16,7 @@ class LevelEditor:
         self.dt = 1
         self.keys_pressed = None
 
-        self.input_box = menu.InputBox(10, 10, 140, 32)
+        self.input_box = menu.InputBox(80, 25, 140, 32, "blue", "dark blue", "white", font_size=22)
 
         self.players = pg.sprite.Group()
         self.walls = pg.sprite.Group()

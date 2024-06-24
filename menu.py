@@ -3,12 +3,15 @@ import utils
 
 
 class InputBox:
-    def __init__(self, x, y, w, h, text=''):
-        self.active_colour = "blue"
-        self.inactive_colour = "dark blue"
-        self.font = pg.font.Font(None, 32)
+    def __init__(self, center_x, center_y, width, height, active_colour, inactive_colour, text_colour, font='freesansbold.ttf', font_size=22, text=''):
+        self.active_colour = active_colour
+        self.inactive_colour = inactive_colour
+        self.text_colour = text_colour
+        self.font = pg.font.Font(font, font_size)
 
-        self.rect = pg.Rect(x, y, w, h)
+        x = center_x - width / 2
+        y = center_y - height / 2
+        self.rect = pg.Rect(x, y, width, height)
         self.color = self.inactive_colour
         self.text = text
         self.txt_surface = self.font.render(text, True, self.color)
@@ -33,7 +36,7 @@ class InputBox:
                 else:
                     self.text += event.unicode
                 # Re-render the text.
-                self.txt_surface = self.font.render(self.text, True, self.color)
+                self.txt_surface = self.font.render(self.text, True, self.text_colour)
             self.color = self.active_colour if self.active else self.inactive_colour
             self.update()
 
@@ -50,21 +53,15 @@ class InputBox:
 
 
 class Button:
-    def __init__(self, screen, center_x, center_y, width, height, border, curve, buttonColour, textColour, hoverColour, id, text, font='freesansbold.ttf', font_size=80, text_offset=0):
-        pg.init()
-        pg.font.init()
+    def __init__(self, center_x, center_y, width, height, border, curve, buttonColour, textColour, hoverColour, id, text, font='freesansbold.ttf', font_size=80, text_offset=0):
         self.font_size = font_size
         self.font = pg.font.Font(font, font_size)
         self.text_offset = text_offset
-
-        self.screen = screen
 
         x = center_x - width / 2
         y = center_y - height / 2
         self.x = x
         self.y = y
-        self.width = width
-        self.height = height
         self.border = border
         self.curve = curve
         self.buttonColour = buttonColour
@@ -72,11 +69,11 @@ class Button:
         self.hover_colour = hoverColour
         self.id = id
         self.text = text
-        self.rect = pg.Rect(self.x, self.y, self.width, self.height)
+        self.rect = pg.Rect(self.x, self.y, width, height)
 
         self.highlighted = False
 
-    def update(self, event):
+    def handle_event(self, event):
         if not hasattr(event, "pos"):
             return
 
@@ -87,16 +84,16 @@ class Button:
         elif not self.rect.collidepoint(event.pos):
             self.highlighted = False
 
-    def draw(self):
+    def draw(self, screen):
         if self.highlighted:
-            pg.draw.rect(self.screen, self.hover_colour, self.rect, self.border, self.curve)
+            pg.draw.rect(screen, self.hover_colour, self.rect, self.border, self.curve)
         else:
-            pg.draw.rect(self.screen, self.buttonColour, self.rect, self.border, self.curve)
+            pg.draw.rect(screen, self.buttonColour, self.rect, self.border, self.curve)
 
         if self.text != "":
             text_surf = self.font.render(self.text, True, self.textColour)
             text_rect = text_surf.get_rect(center=(self.rect.centerx, self.rect.centery + self.text_offset))
-            self.screen.blit(text_surf, text_rect)
+            screen.blit(text_surf, text_rect)
 
 
 class Menu:
@@ -107,9 +104,15 @@ class Menu:
         button_info = utils.json_load("data/buttons/buttons.json")[menu]
         self.buttons = []
         for button in button_info:
-            self.buttons.append(
-                Button(screen, button["x"], button["y"], button["width"], button["height"], button["border"], button["curve"], button["buttonColour"], button["textColour"], button["hoverColour"], button["id"], button["text"], button["font"], button["font_size"], button["text_offset"])
-            )
+            if button["type"] == "click":
+                print(button)
+                self.buttons.append(
+                    Button(button["x"], button["y"], button["width"], button["height"], button["border"], button["curve"], button["buttonColour"], button["textColour"], button["hoverColour"], button["id"], button["text"], button["font"], button["font_size"], button["text_offset"])
+                )
+            elif button["type"] == "input_box":
+                self.buttons.append(
+                    InputBox(button["x"], button["y"], button["width"], button["height"], button["active_colour"], button["inactive_colour"], button["textColour"], button["font"], button["font_size"])
+                )
 
     def run(self):
         if not self.buttons:
@@ -127,11 +130,13 @@ class Menu:
                         quit()
 
                 for button in self.buttons:
-                    if button.update(event) and button.id:
+                    if button.handle_event(event) and isinstance(button, Button):
                         return button.id
+                    elif isinstance(button, InputBox) and event.type == pg.KEYDOWN and event.key == pg.K_RETURN:
+                        return "play_level_" + str(button.text)
 
             for button in self.buttons:
-                button.draw()
+                button.draw(self.app.screen)
 
             pg.display.update()
             self.app.screen.fill((60, 60, 60))

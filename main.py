@@ -1,4 +1,4 @@
-import pygame as py
+import pygame as pg
 import menu
 import game
 import level_editor
@@ -6,9 +6,11 @@ import level_editor
 
 class App:
     def __init__(self):
-        py.init()
-        self.screen = py.display.set_mode((800, 600), py.SCALED)
-        self.clock = py.time.Clock()
+        pg.init()
+        pg.init()
+        pg.font.init()
+        self.screen = pg.display.set_mode((800, 600), pg.SCALED)
+        self.clock = pg.time.Clock()
         self.fps = 60
 
         self.fullscreen = False
@@ -18,15 +20,15 @@ class App:
 
     def run(self):
         while True:
-            for event in py.event.get():
-                if event.type == py.QUIT:
-                    py.quit()
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    pg.quit()
                     quit()
 
             while True:
                 match self.selected_mode:
                     case "button_quit":
-                        py.quit()
+                        pg.quit()
                         quit()
 
                     case "level_editor":
@@ -39,10 +41,10 @@ class App:
 
                     case "option_fullscreen":
                         if not self.fullscreen:
-                            self.screen = py.display.set_mode(self.screen.get_size(), py.FULLSCREEN | py.SCALED)
+                            self.screen = pg.display.set_mode(self.screen.get_size(), pg.FULLSCREEN | pg.SCALED)
                             self.fullscreen = True
                         else:
-                            self.screen = py.display.set_mode(self.screen.get_size(), py.SCALED)
+                            self.screen = pg.display.set_mode(self.screen.get_size(), pg.SCALED)
                             self.fullscreen = False
                         self.selected_mode = "menu_options"
 
