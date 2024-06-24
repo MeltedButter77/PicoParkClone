@@ -1,3 +1,4 @@
+import os
 import pygame as py
 
 
@@ -17,7 +18,8 @@ class Player(py.sprite.Sprite):
         self.vel = py.Vector2(0, 0)
 
         # Image & Rect
-        self.image_original = py.image.load(f"assets/players/player.png")
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        self.image_original = py.image.load("../assets/players/player.png")
         self.image = py.transform.scale(self.image_original, self.size)
         self.rect = self.image.get_rect(topleft=self.pos)
         self.old_rect = self.rect

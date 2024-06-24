@@ -1,3 +1,4 @@
+import os
 import pygame as pg
 import utils
 
@@ -99,9 +100,14 @@ class Button:
 class Menu:
     def __init__(self, app, menu="menu_main"):
         self.app = app
-        screen = app.screen
 
-        button_info = utils.json_load("data/buttons/buttons.json")[menu]
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        file_info = utils.json_load("data/buttons/buttons.json")
+        if file_info is None:
+            print("Invalid menu")
+            return
+        button_info = file_info[menu]
+
         self.buttons = []
         for button in button_info:
             if button["type"] == "click":

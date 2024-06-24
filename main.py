@@ -51,11 +51,10 @@ class App:
                     # if the button does not return an action case
                     # send button's id to the menu selector
                     case _:
-                        self.selected_mode = menu.Menu(self, menu=self.selected_mode).run()
-
                         # Handle invalid menu case
                         if self.selected_mode is None:
-                            self.selected_mode = menu.Menu(self, menu="main_menu").run()
+                            self.selected_mode = "menu_main"
+                        self.selected_mode = menu.Menu(self, menu=self.selected_mode).run()
 
 
 app = App()

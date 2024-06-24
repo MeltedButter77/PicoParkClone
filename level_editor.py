@@ -1,9 +1,8 @@
 import pygame as pg
 import pygame.mouse
 import utils
-import player
+from game_objects import player, wall
 import json
-import wall
 import menu
 
 

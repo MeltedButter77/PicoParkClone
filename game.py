@@ -1,7 +1,6 @@
 import pygame as py
 import utils
-import player
-import wall
+from game_objects import player, wall
 
 
 class Game:
