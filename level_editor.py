@@ -97,13 +97,13 @@ class LevelEditor:
                 # Remove walls
                 if event.type == py.MOUSEBUTTONDOWN and event.button == 3:
                     for wall_obj in self.walls:
-                        if wall_obj.rect.move(self.camera).collidepoint(event.pos):
+                        if wall_obj.rect.move(self.camera * -1).collidepoint(event.pos):
                             self.walls.remove(wall_obj)
 
                 # Create new (set mouse_down_pos) or select to move
                 if event.type == py.MOUSEBUTTONDOWN and event.button == 1:
                     for wall_obj in self.walls:
-                        if wall_obj.rect.collidepoint(event.pos):
+                        if wall_obj.rect.move(self.camera * -1).collidepoint(event.pos):
                             selected_wall = wall_obj
                     if not selected_wall:
                         mouse_down_pos = (round(event.pos[0], -1), round(event.pos[1], -1))
@@ -127,11 +127,13 @@ class LevelEditor:
 
                 # Move walls (complete & move display)
                 if event.type == py.MOUSEMOTION and selected_wall:
-                    selected_wall.rect.center = event.pos
+                    selected_wall.rect.center = event.pos + self.camera
                 if event.type == py.MOUSEBUTTONUP and selected_wall:
                     selected_wall = None
 
             ### LOGIC ###
+            self.keys_pressed = py.key.get_pressed()
+            self.move_camera(self.keys_pressed)
 
             # Round wall locations to nearest 10
             for wall_obj in self.walls:
@@ -150,4 +152,14 @@ class LevelEditor:
             self.app.screen.fill((60, 60, 60))
             self.dt = self.app.clock.tick(self.app.fps) / 1000
             py.display.set_caption("FPS: " + str(int(self.app.clock.get_fps())))
+
+    def move_camera(self, keys_pressed):
+        if keys_pressed[py.K_LEFT]:
+            self.camera.x -= 10
+        if keys_pressed[py.K_RIGHT]:
+            self.camera.x += 10
+        if keys_pressed[py.K_UP]:
+            self.camera.y -= 10
+        if keys_pressed[py.K_DOWN]:
+            self.camera.y += 10
 
