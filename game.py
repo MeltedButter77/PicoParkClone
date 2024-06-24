@@ -58,7 +58,6 @@ class Game:
             self.keys_pressed = py.key.get_pressed()
 
             self.move_camera()
-
             self.players.update()
 
             ### RENDER ###
