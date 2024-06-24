@@ -111,7 +111,6 @@ class Menu:
         self.buttons = []
         for button in button_info:
             if button["type"] == "click":
-                print(button)
                 self.buttons.append(
                     Button(button["x"], button["y"], button["width"], button["height"], button["border"], button["curve"], button["buttonColour"], button["textColour"], button["hoverColour"], button["id"], button["text"], button["font"], button["font_size"], button["text_offset"])
                 )
