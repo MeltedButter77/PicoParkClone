@@ -1,3 +1,4 @@
+import os
 import pygame as pg
 import pygame.mouse
 import utils
@@ -138,6 +139,7 @@ class LevelEditor:
                 "height": player_obj.rect.height,
             })
 
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         path = f"data/levels/level_{self.input_box.text}.json"
         # Write to json
         with open(path, "w") as write:
