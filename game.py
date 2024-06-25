@@ -1,7 +1,6 @@
 import pygame as py
 import utils
-import player
-import wall
+from game_objects import player, wall
 
 
 class Game:
@@ -77,5 +76,10 @@ class Game:
         total_players_pos = py.Vector2(0, 0)
         for player_obj in self.players.sprites():
             total_players_pos += player_obj.pos
-        average_pos = total_players_pos / len(self.players.sprites()) - py.Vector2(self.app.screen.get_size()) / 2
+
+        try:
+            average_pos = total_players_pos / len(self.players.sprites()) - py.Vector2(self.app.screen.get_size()) / 2
+        except ZeroDivisionError:
+            average_pos = (0, 0)
+
         self.camera = py.Vector2(average_pos)

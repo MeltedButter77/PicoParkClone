@@ -15,10 +15,12 @@ class Player(pg.sprite.Sprite):
         self.pos = pg.Vector2(position)
         self.size = pg.Vector2(size)
         self.vel = pg.Vector2(0, 0)
+
         self.carrying = []
         self.grounded = False
 
         # Image & Rect
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         self.image_original = pg.image.load(f"assets/players/player.png")
         self.image = pg.transform.scale(self.image_original, self.size)
         self.rect = self.image.get_rect(topleft=self.pos)
@@ -50,7 +52,7 @@ class Player(pg.sprite.Sprite):
             # If rect was not updated, when updating pos after moving rect (by setting pos to rect.topleft) pos gets rounded.
             # This would cause off-by-1 errors which look jittery as the collision would not be detected and after being moved by gravity
             # it would round to colliding rather than colliding and being moved back.
-            self.rect = pg.Rect(self.pos.x, self.pos.y, self.size.x, self.size.y)
+            self.rect = py.Rect(self.pos.x, self.pos.y, self.size.x, self.size.y)
 
             # Will change velocity depending on collisions
             self.collision_check()

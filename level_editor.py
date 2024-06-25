@@ -1,9 +1,9 @@
+import os
 import pygame as pg
 import pygame.mouse
 import utils
-import player
+from game_objects import player, wall
 import json
-import wall
 import menu
 
 
@@ -16,7 +16,7 @@ class LevelEditor:
         self.dt = 1
         self.keys_pressed = None
 
-        self.input_box = menu.InputBox(10, 10, 140, 32)
+        self.input_box = menu.InputBox(80, 25, 140, 32, "blue", "dark blue", "white", font_size=22)
 
         self.players = pg.sprite.Group()
         self.walls = pg.sprite.Group()
@@ -139,6 +139,7 @@ class LevelEditor:
                 "height": player_obj.rect.height,
             })
 
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         path = f"data/levels/level_{self.input_box.text}.json"
         # Write to json
         with open(path, "w") as write:
