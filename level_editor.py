@@ -1,10 +1,11 @@
 import os
 import pygame as pg
 import pygame.mouse
+import game
 import utils
-from game_objects import player, wall
 import json
 import menu
+from game_objects import wall
 
 
 class LevelEditor:
@@ -20,6 +21,8 @@ class LevelEditor:
 
         self.players = pg.sprite.Group()
         self.walls = pg.sprite.Group()
+        self.blocks = pg.sprite.Group()
+        self.groups = [self.players, self.walls, self.blocks]
 
     def run(self):
         
@@ -41,9 +44,9 @@ class LevelEditor:
                         return "menu_main"
                     if not self.input_box.active:
                         if event.key == pg.K_s and self.input_box.text:
-                            self.export()
+                            self.export_level_file()
                         if event.key == pg.K_l and self.input_box.text:
-                            self.load()
+                            self.load_level_file()
 
                 # Camera movement
                 if event.type == pg.MOUSEBUTTONDOWN and event.button == 2:
@@ -105,24 +108,24 @@ class LevelEditor:
                 wall_obj.rect.y = round(wall_obj.rect.y, -1)
 
             ### RENDER ###
-            for wall_obj in self.walls:
-                wall_obj.draw(self.app.screen, self.camera)
-            for player_obj in self.players:
-                player_obj.draw(self.app.screen, self.camera)
+            for group in self.groups:
+                for obj in group:
+                    obj.draw(self.app.screen)
             if display_rect:
                 pygame.draw.rect(self.app.screen, (255, 255, 255), display_rect)
 
             self.input_box.draw(self.app.screen)
 
             pg.display.update()
-            self.app.screen.fill((60, 60, 60))
+            self.app.screen.fill("light blue")
             self.dt = self.app.clock.tick(self.app.fps) / 1000
             pg.display.set_caption("FPS: " + str(int(self.app.clock.get_fps())))
 
-    def export(self):
+    def export_level_file(self):
         info_dict = {
             "players": [],
-            "walls": []
+            "walls": [],
+            "blocks": [],
         }
         for wall_obj in self.walls.sprites():
             info_dict["walls"].append({
@@ -138,6 +141,14 @@ class LevelEditor:
                 "width": player_obj.rect.width,
                 "height": player_obj.rect.height,
             })
+        for block_obj in self.blocks.sprites():
+            info_dict["blocks"].append({
+                "x": block_obj.rect.centerx,
+                "y": block_obj.rect.centery,
+                "width": block_obj.rect.width,
+                "height": block_obj.rect.height,
+                "push_amount": block_obj.push_amount,
+            })
 
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         path = f"data/levels/level_{self.input_box.text}.json"
@@ -145,42 +156,15 @@ class LevelEditor:
         with open(path, "w") as write:
             json.dump(info_dict, write, indent=2)
 
-    def load(self):
+    def load_level_file(self):
         # Clear current sprites
-        self.players = pg.sprite.Group()
-        self.walls = pg.sprite.Group()
+        for group in self.groups:
+            group = pg.sprite.Group()
 
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         path = f"data/levels/level_{self.input_box.text}.json"
         level_info = utils.json_load(path)
-
-        if not level_info:
-            print("failed to load level")
-            return
-
-        if level_info["players"]:
-            for i, info in enumerate(level_info["players"]):
-                controls = None
-
-                # Player controls should be imported from json, for now they are all stored here
-                if i == 0:
-                    controls = [pg.K_w, pg.K_a, pg.K_s, pg.K_d]
-                elif i == 1:
-                    controls = [pg.K_UP, pg.K_LEFT, pg.K_DOWN, pg.K_RIGHT]
-                elif i == 2:
-                    controls = [pg.K_i, pg.K_j, pg.K_k, pg.K_l]
-
-                if controls:
-                    player.Player(self, (info["x"], info["y"]), (info["width"], info["height"]), controls, self.players)
-                else:
-                    print("not enough controls defined for player", i + 1)
-        else:
-            print("no players in level")
-
-        if level_info["walls"]:
-            for wall_info in level_info["walls"]:
-                wall.Wall(self, (wall_info["x"], wall_info["y"]), (wall_info["width"], wall_info["height"]), self.walls)
-        else:
-            print("no walls in level")
+        game.load_level(self, level_info)
 
     def move_camera(self, keys_pressed):
         if keys_pressed[pg.K_LEFT]:

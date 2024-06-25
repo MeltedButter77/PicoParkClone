@@ -1,6 +1,8 @@
 import pygame as pg
 import os
 
+from game_objects import block
+
 
 class Player(pg.sprite.Sprite):
     def __init__(self, game, position, size, controls, *groups: pg.sprite.Group):
@@ -8,13 +10,12 @@ class Player(pg.sprite.Sprite):
         self.game = game
 
         # Set Variables
-        self.gravity = pg.Vector2(0, 10) # x gravity, still buggy. -y should work
+        self.gravity = pg.Vector2(0, 600)  # x gravity, still buggy. -y should work
         self.move_speed = 300
         self.controls = tuple(controls)  # (w,a,s,d)
 
         # Changing Variables
         self.pos = pg.Vector2(position)
-        self.size = pg.Vector2(size)
         self.vel = pg.Vector2(0, 0)
 
         self.carrying = []
@@ -23,7 +24,7 @@ class Player(pg.sprite.Sprite):
         # Image & Rect
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         self.image_original = pg.image.load(f"../assets/players/player.png")
-        self.image = pg.transform.scale(self.image_original, self.size)
+        self.image = pg.transform.scale(self.image_original, size)
         self.rect = self.image.get_rect(topleft=self.pos)
         self.old_rect = self.rect
 
@@ -44,29 +45,27 @@ class Player(pg.sprite.Sprite):
                 self.vel.x = 0
 
             # Apply Gravity
-            self.vel += self.gravity
+            self.vel += self.gravity * dt
 
             # Apply velocity accounting for dt
             self.pos += self.vel * dt
 
-            # EXPLANATION about order of operations -- update rect before collision.
-            # This allows for the use of the rect in collision calculations
-            # If rect was not updated, when updating pos after moving rect (by setting pos to rect.topleft) pos gets rounded.
-            # This would cause off-by-1 errors which look jittery as the collision would not be detected and after being moved by gravity
-            # it would round to colliding rather than colliding and being moved back.
-            self.rect = pg.Rect(self.pos.x, self.pos.y, self.size.x, self.size.y)
+            # update rect before collision.
+            self.rect.topleft = self.pos
+            # round pos to prevent floating point errors
+            self.pos = pg.Vector2(self.rect.topleft)
 
             # Will change velocity depending on collisions
             self.collision_check()
-            # Calculate after collrecting position
+            # Calculate after calculating position
             self.calc_grounded()
 
     def calc_grounded(self):
         # Get rectangles for walls and players directly into a list
-        collision_rects = [wall.rect for wall in self.game.walls]
-        collision_rects.extend(player.rect for player in self.game.players if player != self)
+        collision_rects = [obj.rect for group in self.game.groups for obj in group if obj != self]  # Use this to include self - [obj.rect for group in self.game.groups for obj in group]
 
         # Identify all rectangles that collide with self.rect which is one bigger in the vertical direction
+        collide_indices = []
         if self.gravity.y > 0:
             collide_indices = self.rect.inflate(0, 1).collidelistall(collision_rects)
         elif self.gravity.y < 0:
@@ -84,44 +83,52 @@ class Player(pg.sprite.Sprite):
 
         if collided_rects:
             self.grounded = True
-            print("Grounded")
         else:
             self.grounded = False
-            print("NOT Grounded")
-
 
     def collision_check(self):
+        collision_objects = [obj for group in self.game.groups for obj in group if obj != self]
+
         # Get rectangles for walls and players directly into a list
-        collision_rects = [wall.rect for wall in self.game.walls]
-        collision_rects.extend(player.rect for player in self.game.players) #if player != self) # BUG for some reason, removing self causes jittering
+        collision_rects = [obj.rect for obj in collision_objects]
 
         # Identify all rectangles that collide with self.rect
         collide_indices = self.rect.collidelistall(collision_rects)
 
         # Filter collide_rects to include only the rectangles that actually collide
-        collided_rects = [collision_rects[i] for i in collide_indices]
+        collided_objs = [collision_objects[i] for i in collide_indices]
 
-        for collided_rect in collided_rects:
-            # if rect.bottom is lower than wall top and old_rect.bottom is higher than rect top
-            if (self.rect.bottom > collided_rect.top >= self.old_rect.bottom and
-                    self.rect.right > collided_rect.left and self.rect.left < collided_rect.right):
-                self.rect.bottom = collided_rect.top
+        for collided_obj in collided_objs:
+            # bottom side collision
+            if (self.rect.bottom > collided_obj.rect.top >= self.old_rect.bottom and
+                    self.rect.right > collided_obj.rect.left and self.rect.left < collided_obj.rect.right):
+                self.rect.bottom = collided_obj.rect.top
                 self.vel.y = min(self.vel.y, 0)
 
-            # if rect.top is higher than wall bottom and old_rect.top is lower than rect bottom
-            if (self.rect.top < collided_rect.bottom <= self.old_rect.top and
-                    self.rect.right > collided_rect.left and self.rect.left < collided_rect.right):
-                self.rect.top = collided_rect.bottom
+            # top side collision
+            if (self.rect.top < collided_obj.rect.bottom <= self.old_rect.top and
+                    self.rect.right > collided_obj.rect.left and self.rect.left < collided_obj.rect.right):
+                self.rect.top = collided_obj.rect.bottom
                 self.vel.y = max(self.vel.y, 0)
 
-            if (self.rect.right > collided_rect.left >= self.old_rect.right and
-                    self.rect.bottom > collided_rect.top and self.rect.top < collided_rect.bottom):
-                self.rect.right = collided_rect.left
+            # right side collision
+            if (self.rect.right > collided_obj.rect.left >= self.old_rect.right and
+                    self.rect.bottom > collided_obj.rect.top and self.rect.top < collided_obj.rect.bottom):
+
+                if isinstance(collided_obj, block.PushBlock):
+                    collided_obj.push("right")
+
+                self.rect.right = collided_obj.rect.left
                 self.vel.x = min(self.vel.x, 0)
 
-            if (self.rect.left < collided_rect.right <= self.old_rect.left and
-                    self.rect.bottom > collided_rect.top and self.rect.top < collided_rect.bottom):
-                self.rect.left = collided_rect.right
+            # left side collision
+            if (self.rect.left < collided_obj.rect.right <= self.old_rect.left and
+                    self.rect.bottom > collided_obj.rect.top and self.rect.top < collided_obj.rect.bottom):
+
+                if isinstance(collided_obj, block.PushBlock):
+                    collided_obj.push("left")
+
+                self.rect.left = collided_obj.rect.right
                 self.vel.x = max(self.vel.x, 0)
 
             # Update pos attribute, as the rect was moved to the correct position
@@ -129,6 +136,6 @@ class Player(pg.sprite.Sprite):
 
         self.old_rect = self.rect.copy()
 
-    def draw(self, screen, camera):
-        location = [self.rect[i] - camera[i] for i in range(2)]
+    def draw(self, screen):
+        location = [self.rect[i] - self.game.camera[i] for i in range(2)]
         screen.blit(self.image, location)
