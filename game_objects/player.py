@@ -1,8 +1,6 @@
 import pygame as pg
 import os
-
 from game_objects import block
-
 
 
 class Player(pg.sprite.Sprite):
@@ -10,12 +8,22 @@ class Player(pg.sprite.Sprite):
         super().__init__(*groups)
         self.game = game
 
-        self.gravity_direction = "left"
+        # No non-gravity dependant perma variables
 
+        # Gravity dependent perma variables
+        gravity_direction = "down"
         gravity = 600
         move_speed = 300
         jump_amount = 300
 
+        # Changing Variables
+        self.pos = pg.Vector2(position)
+        self.gravity_vel = pg.Vector2(0, 0)
+        self.move_vel = pg.Vector2(0, 0)
+        self.carrying = []
+        self.grounded = False
+
+        # Controls and gravity setup
         self.controls_original = tuple(controls)
         # Dictionary mapping gravity directions to (gravity_vec, move_vec, jump_vec)
         self.directions = {
@@ -24,17 +32,11 @@ class Player(pg.sprite.Sprite):
             "up": (pg.Vector2(0, -gravity), pg.Vector2(-move_speed, 0), pg.Vector2(0, jump_amount)),
             "down": (pg.Vector2(0, gravity), pg.Vector2(-move_speed, 0), pg.Vector2(0, -jump_amount))
         }
+        # Add attributes
+        self.gravity_direction, self.controls, self.gravity_vec, self.move_vec, self.jump_vec = None, None, None, None, None
 
-        self.controls, self.gravity_vec, self.move_vec, self.jump_vec = None, None, None, None
-        self.update_gravity_vectors("left")
-
-        # Changing Variables
-        self.pos = pg.Vector2(position)
-        self.gravity_vel = pg.Vector2(0, 0)
-        self.move_vel = pg.Vector2(0, 0)
-
-        self.carrying = []
-        self.grounded = False
+        # Update vectors based on gravity_direction
+        self.update_gravity_vectors(gravity_direction)
 
         # Image & Rect
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -42,23 +44,6 @@ class Player(pg.sprite.Sprite):
         self.image = pg.transform.scale(self.image_original, size)
         self.rect = self.image.get_rect(topleft=self.pos)
         self.old_rect = self.rect
-
-    def update_gravity_vectors(self, gravity_direction):
-        self.gravity_direction = gravity_direction
-        self.gravity_vec, self.move_vec, self.jump_vec = self.directions[self.gravity_direction]
-        if gravity_direction == 'down':
-            self.controls = self.controls_original
-        elif gravity_direction == 'up':
-            # Invert up and down
-            self.controls = [self.controls_original[2], self.controls_original[1], self.controls_original[0] .controls_original[3]]
-        elif gravity_direction == 'left':
-            # Rotate controls left
-            self.controls = [self.controls_original[3], self.controls_original[0], self.controls_original[1], self.controls_original[2]]
-        elif gravity_direction == 'right':
-            # Rotate controls right
-            self.controls = [self.controls_original[1], self.controls_original[2], self.controls_original[3], self.controls_original[0]]
-        else:
-            raise ValueError("Invalid gravity direction")
 
     def update(self, event=None):
         if event:
@@ -116,7 +101,6 @@ class Player(pg.sprite.Sprite):
             self.grounded = True
         else:
             self.grounded = False
-        print("grounded", self.grounded)
 
     def collision_check(self):
         collision_objects = [obj for group in self.game.groups for obj in group if obj != self]
@@ -175,6 +159,26 @@ class Player(pg.sprite.Sprite):
             self.pos = pg.Vector2(self.rect.topleft)
 
         self.old_rect = self.rect.copy()
+
+    def update_gravity_vectors(self, gravity_direction):
+        # update direction attribute
+        self.gravity_direction = gravity_direction
+        # update vectors
+        self.gravity_vec, self.move_vec, self.jump_vec = self.directions[self.gravity_direction]
+        # update controls
+        if gravity_direction == 'down':
+            self.controls = self.controls_original
+        elif gravity_direction == 'up':
+            # Invert up and down
+            self.controls = [self.controls_original[2], self.controls_original[1], self.controls_original[0] .controls_original[3]]
+        elif gravity_direction == 'left':
+            # Rotate controls left
+            self.controls = [self.controls_original[3], self.controls_original[0], self.controls_original[1], self.controls_original[2]]
+        elif gravity_direction == 'right':
+            # Rotate controls right
+            self.controls = [self.controls_original[1], self.controls_original[2], self.controls_original[3], self.controls_original[0]]
+        else:
+            raise ValueError("Invalid gravity direction")
 
     def draw(self, screen):
         location = [self.rect[i] - self.game.camera[i] for i in range(2)]

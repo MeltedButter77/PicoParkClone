@@ -8,28 +8,31 @@ class PushBlock(pg.sprite.Sprite):
         super().__init__(*groups)
         self.game = game
 
+        # Perma variables
+        self.push_speed = 150
+        self.push_amount = info['push_amount']
+
+        # Gravity dependant perma variables
+        gravity_direction = "left"
+        gravity = 300
+
+        # Changing Variables
         self.pos = pg.Vector2(info['x'], info['y'])
         self.gravity_vel = pg.Vector2(0, 0)
         size = (info['width'], info['height'])
-        self.push_amount = info['push_amount']
-
-        gravity = 300
-
-        self.gravity_direction = "left"
 
         # Dictionary mapping gravity directions to (gravity_vec, move_vec, jump_vec)
-        directions = {
+        self.directions = {
             "right": (pg.Vector2(gravity, 0)),
             "left": (pg.Vector2(-gravity, 0)),
             "up": (pg.Vector2(0, -gravity)),
             "down": (pg.Vector2(0, gravity))
         }
+        # Add attributes
+        self.gravity_direction, self.gravity_vec = None, None
+
         # Apply the vectors based on the gravity direction
-        if self.gravity_direction in directions.keys():
-            self.gravity_vec = directions[self.gravity_direction]
-        else:
-            raise ValueError("Invalid gravity direction")
-        self.push_speed = 150
+        self.update_gravity_vectors(gravity_direction)
 
         # Image & Rect
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -38,6 +41,10 @@ class PushBlock(pg.sprite.Sprite):
         self.image = pg.transform.scale(self.image_original, size)
         self.rect = self.image.get_rect(topleft=self.pos)
         self.old_rect = self.rect
+
+    def update_gravity_vectors(self, gravity_direction):
+        self.gravity_direction = gravity_direction
+        self.gravity_vec = self.directions[gravity_direction]
 
     def update(self):
         # Apply Gravity
