@@ -30,7 +30,8 @@ class Player(pg.sprite.Sprite):
     def update(self, event=None):
         if event:
             if event.key == self.controls[0]:
-                self.vel.y = -self.move_speed
+                if self.grounded:
+                    self.vel.y = -self.move_speed
         else:
             dt = self.game.dt
             keys = self.game.keys_pressed

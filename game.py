@@ -67,7 +67,7 @@ class Game:
 
             # Update screen
             py.display.update()
-            self.app.screen.fill((60, 60, 60))
+            self.app.screen.fill("light blue")
             self.dt = self.app.clock.tick(self.app.fps) / 1000
             py.display.set_caption("FPS: " + str(int(self.app.clock.get_fps())))
 
