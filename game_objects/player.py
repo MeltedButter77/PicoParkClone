@@ -4,19 +4,34 @@ import os
 from game_objects import block
 
 
+
 class Player(pg.sprite.Sprite):
     def __init__(self, game, position, size, controls, *groups: pg.sprite.Group):
         super().__init__(*groups)
         self.game = game
 
-        # Set Variables
-        self.gravity = pg.Vector2(0, 600)  # x gravity, still buggy. -y should work
-        self.move_speed = 300
-        self.controls = tuple(controls)  # (w,a,s,d)
+        self.gravity_direction = "left"
+
+        gravity = 600
+        move_speed = 300
+        jump_amount = 300
+
+        self.controls_original = tuple(controls)
+        # Dictionary mapping gravity directions to (gravity_vec, move_vec, jump_vec)
+        self.directions = {
+            "right": (pg.Vector2(gravity, 0), pg.Vector2(0, move_speed), pg.Vector2(-jump_amount, 0)),
+            "left": (pg.Vector2(-gravity, 0), pg.Vector2(0, -move_speed), pg.Vector2(jump_amount, 0)),
+            "up": (pg.Vector2(0, -gravity), pg.Vector2(-move_speed, 0), pg.Vector2(0, jump_amount)),
+            "down": (pg.Vector2(0, gravity), pg.Vector2(-move_speed, 0), pg.Vector2(0, -jump_amount))
+        }
+
+        self.controls, self.gravity_vec, self.move_vec, self.jump_vec = None, None, None, None
+        self.update_gravity_vectors("left")
 
         # Changing Variables
         self.pos = pg.Vector2(position)
-        self.vel = pg.Vector2(0, 0)
+        self.gravity_vel = pg.Vector2(0, 0)
+        self.move_vel = pg.Vector2(0, 0)
 
         self.carrying = []
         self.grounded = False
@@ -28,27 +43,46 @@ class Player(pg.sprite.Sprite):
         self.rect = self.image.get_rect(topleft=self.pos)
         self.old_rect = self.rect
 
+    def update_gravity_vectors(self, gravity_direction):
+        self.gravity_direction = gravity_direction
+        self.gravity_vec, self.move_vec, self.jump_vec = self.directions[self.gravity_direction]
+        if gravity_direction == 'down':
+            self.controls = self.controls_original
+        elif gravity_direction == 'up':
+            # Invert up and down
+            self.controls = [self.controls_original[2], self.controls_original[1], self.controls_original[0] .controls_original[3]]
+        elif gravity_direction == 'left':
+            # Rotate controls left
+            self.controls = [self.controls_original[3], self.controls_original[0], self.controls_original[1], self.controls_original[2]]
+        elif gravity_direction == 'right':
+            # Rotate controls right
+            self.controls = [self.controls_original[1], self.controls_original[2], self.controls_original[3], self.controls_original[0]]
+        else:
+            raise ValueError("Invalid gravity direction")
+
     def update(self, event=None):
         if event:
             if event.key == self.controls[0]:
                 if self.grounded:
-                    self.vel.y = -self.move_speed
+                    self.gravity_vel = self.jump_vec.copy()
+
         else:
+
             dt = self.game.dt
             keys = self.game.keys_pressed
 
             if keys[self.controls[1]]:
-                self.vel.x = -self.move_speed
+                self.move_vel = self.move_vec
             elif keys[self.controls[3]]:
-                self.vel.x = self.move_speed
+                self.move_vel = -self.move_vec
             else:
-                self.vel.x = 0
+                self.move_vel = pg.Vector2(0, 0)
 
             # Apply Gravity
-            self.vel += self.gravity * dt
+            self.gravity_vel += self.gravity_vec * dt
 
             # Apply velocity accounting for dt
-            self.pos += self.vel * dt
+            self.pos += (self.gravity_vel + self.move_vel) * dt
 
             # update rect before collision.
             self.rect.topleft = self.pos
@@ -66,17 +100,14 @@ class Player(pg.sprite.Sprite):
 
         # Identify all rectangles that collide with self.rect which is one bigger in the vertical direction
         collide_indices = []
-        if self.gravity.y > 0:
+        if self.gravity_direction == "down":
             collide_indices = self.rect.inflate(0, 1).collidelistall(collision_rects)
-        elif self.gravity.y < 0:
+        elif self.gravity_direction == "up":
             collide_indices = self.rect.inflate(0, 1).move(0, -1).collidelistall(collision_rects)
-        if self.gravity.x > 0:
+        if self.gravity_direction == "right":
             collide_indices = self.rect.inflate(1, 0).collidelistall(collision_rects)
-        elif self.gravity.x < 0:
+        elif self.gravity_direction == "left":
             collide_indices = self.rect.inflate(1, 0).move(-1, 0).collidelistall(collision_rects)
-
-        if self.gravity.length() == 0:
-            collide_indices = self.rect.inflate(2, 2).move(-1, -1).collidelistall(collision_rects)
 
         # Filter collide_rects to include only the rectangles that actually collide
         collided_rects = [collision_rects[i] for i in collide_indices]
@@ -85,6 +116,7 @@ class Player(pg.sprite.Sprite):
             self.grounded = True
         else:
             self.grounded = False
+        print("grounded", self.grounded)
 
     def collision_check(self):
         collision_objects = [obj for group in self.game.groups for obj in group if obj != self]
@@ -102,14 +134,22 @@ class Player(pg.sprite.Sprite):
             # bottom side collision
             if (self.rect.bottom > collided_obj.rect.top >= self.old_rect.bottom and
                     self.rect.right > collided_obj.rect.left and self.rect.left < collided_obj.rect.right):
+
+                if isinstance(collided_obj, block.PushBlock):
+                    collided_obj.push("down")
+
                 self.rect.bottom = collided_obj.rect.top
-                self.vel.y = min(self.vel.y, 0)
+                self.gravity_vel.y = min(self.gravity_vel.y, 0)
 
             # top side collision
             if (self.rect.top < collided_obj.rect.bottom <= self.old_rect.top and
                     self.rect.right > collided_obj.rect.left and self.rect.left < collided_obj.rect.right):
+
+                if isinstance(collided_obj, block.PushBlock):
+                    collided_obj.push("up")
+
                 self.rect.top = collided_obj.rect.bottom
-                self.vel.y = max(self.vel.y, 0)
+                self.gravity_vel.y = max(self.gravity_vel.y, 0)
 
             # right side collision
             if (self.rect.right > collided_obj.rect.left >= self.old_rect.right and
@@ -119,7 +159,7 @@ class Player(pg.sprite.Sprite):
                     collided_obj.push("right")
 
                 self.rect.right = collided_obj.rect.left
-                self.vel.x = min(self.vel.x, 0)
+                self.gravity_vel.x = min(self.gravity_vel.x, 0)
 
             # left side collision
             if (self.rect.left < collided_obj.rect.right <= self.old_rect.left and
@@ -129,7 +169,7 @@ class Player(pg.sprite.Sprite):
                     collided_obj.push("left")
 
                 self.rect.left = collided_obj.rect.right
-                self.vel.x = max(self.vel.x, 0)
+                self.gravity_vel.x = max(self.gravity_vel.x, 0)
 
             # Update pos attribute, as the rect was moved to the correct position
             self.pos = pg.Vector2(self.rect.topleft)

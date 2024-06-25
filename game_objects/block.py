@@ -9,11 +9,26 @@ class PushBlock(pg.sprite.Sprite):
         self.game = game
 
         self.pos = pg.Vector2(info['x'], info['y'])
-        self.vel = pg.Vector2(0, 0)
+        self.gravity_vel = pg.Vector2(0, 0)
         size = (info['width'], info['height'])
         self.push_amount = info['push_amount']
 
-        self.gravity = pg.Vector2(0, 10)
+        gravity = 300
+
+        self.gravity_direction = "left"
+
+        # Dictionary mapping gravity directions to (gravity_vec, move_vec, jump_vec)
+        directions = {
+            "right": (pg.Vector2(gravity, 0)),
+            "left": (pg.Vector2(-gravity, 0)),
+            "up": (pg.Vector2(0, -gravity)),
+            "down": (pg.Vector2(0, gravity))
+        }
+        # Apply the vectors based on the gravity direction
+        if self.gravity_direction in directions.keys():
+            self.gravity_vec = directions[self.gravity_direction]
+        else:
+            raise ValueError("Invalid gravity direction")
         self.push_speed = 150
 
         # Image & Rect
@@ -26,10 +41,10 @@ class PushBlock(pg.sprite.Sprite):
 
     def update(self):
         # Apply Gravity
-        self.vel += self.gravity
+        self.gravity_vel += self.gravity_vec * self.game.dt
 
         # Apply velocity accounting for dt
-        self.pos += self.vel * self.game.dt
+        self.pos += self.gravity_vel * self.game.dt
 
         # Update rect
         self.rect.topleft = self.pos
@@ -54,23 +69,23 @@ class PushBlock(pg.sprite.Sprite):
             if (self.rect.bottom > collided_obj.rect.top >= self.old_rect.bottom and
                     self.rect.right > collided_obj.rect.left and self.rect.left < collided_obj.rect.right):
                 self.rect.bottom = collided_obj.rect.top
-                self.vel.y = min(self.vel.y, 0)
+                self.gravity_vel.y = min(self.gravity_vel.y, 0)
 
             # if rect.top is higher than wall bottom and old_rect.top is lower than rect bottom
             if (self.rect.top < collided_obj.rect.bottom <= self.old_rect.top and
                     self.rect.right > collided_obj.rect.left and self.rect.left < collided_obj.rect.right):
                 self.rect.top = collided_obj.rect.bottom
-                self.vel.y = max(self.vel.y, 0)
+                self.gravity_vel.y = max(self.gravity_vel.y, 0)
 
             if (self.rect.right > collided_obj.rect.left >= self.old_rect.right and
                     self.rect.bottom > collided_obj.rect.top and self.rect.top < collided_obj.rect.bottom):
                 self.rect.right = collided_obj.rect.left
-                self.vel.x = min(self.vel.x, 0)
+                self.gravity_vel.x = min(self.gravity_vel.x, 0)
 
             if (self.rect.left < collided_obj.rect.right <= self.old_rect.left and
                     self.rect.bottom > collided_obj.rect.top and self.rect.top < collided_obj.rect.bottom):
                 self.rect.left = collided_obj.rect.right
-                self.vel.x = max(self.vel.x, 0)
+                self.gravity_vel.x = max(self.gravity_vel.x, 0)
 
             # Update pos attribute, as the rect was moved to the correct position
             self.pos = pg.Vector2(self.rect.topleft)
@@ -82,6 +97,10 @@ class PushBlock(pg.sprite.Sprite):
             self.pos.x += self.push_speed * self.game.dt
         elif direction == "left":
             self.pos.x -= self.push_speed * self.game.dt
+        if direction == "down":
+            self.pos.y += self.push_speed * self.game.dt
+        elif direction == "up":
+            self.pos.y -= self.push_speed * self.game.dt
 
     def draw(self, screen):
         location = [self.rect[i] - self.game.camera[i] for i in range(2)]
