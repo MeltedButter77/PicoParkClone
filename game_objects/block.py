@@ -13,7 +13,7 @@ class PushBlock(pg.sprite.Sprite):
         self.push_amount = info['push_amount']
 
         # Gravity dependant perma variables
-        gravity_direction = "left"
+        gravity_direction = "down"
         gravity = 300
 
         # Changing Variables
