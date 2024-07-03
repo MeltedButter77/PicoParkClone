@@ -9,7 +9,7 @@ class App:
         pg.init()
         pg.init()
         pg.font.init()
-        self.screen = pg.display.set_mode((800, 600), pg.SCALED)
+        self.screen = pg.display.set_mode((1000, 600), pg.SCALED)
         self.clock = pg.time.Clock()
         self.fps = 60
 
