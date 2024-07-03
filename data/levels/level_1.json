@@ -4,13 +4,15 @@
       "x": 175,
       "y": 275,
       "width": 50,
-      "height": 50
+      "height": 50,
+      "gravity": "down"
     },
     {
       "x": 275,
       "y": 275,
       "width": 50,
-      "height": 50
+      "height": 50,
+      "gravity": "down"
     }
   ],
   "walls": [
