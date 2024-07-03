@@ -4,14 +4,13 @@ from game_objects import block
 
 
 class Player(pg.sprite.Sprite):
-    def __init__(self, game, position, size, controls, *groups: pg.sprite.Group):
+    def __init__(self, game, position, size, gravity_direction, controls, *groups: pg.sprite.Group):
         super().__init__(*groups)
         self.game = game
 
         # No non-gravity dependant perma variables
 
         # Gravity dependent perma variables
-        gravity_direction = "down"
         gravity = 600
         move_speed = 300
         jump_amount = 300
@@ -160,21 +159,21 @@ class Player(pg.sprite.Sprite):
 
         self.old_rect = self.rect.copy()
 
-    def update_gravity_vectors(self, gravity_direction):
+    def update_gravity_vectors(self, new_gravity_direction):
         # update direction attribute
-        self.gravity_direction = gravity_direction
+        self.gravity_direction = new_gravity_direction
         # update vectors
-        self.gravity_vec, self.move_vec, self.jump_vec = self.directions[self.gravity_direction]
+        self.gravity_vec, self.move_vec, self.jump_vec = self.directions[new_gravity_direction]
         # update controls
-        if gravity_direction == 'down':
+        if new_gravity_direction == 'down':
             self.controls = self.controls_original
-        elif gravity_direction == 'up':
+        elif new_gravity_direction == 'up':
             # Invert up and down
-            self.controls = [self.controls_original[2], self.controls_original[1], self.controls_original[0] .controls_original[3]]
-        elif gravity_direction == 'left':
+            self.controls = [self.controls_original[2], self.controls_original[1], self.controls_original[0], self.controls_original[3]]
+        elif new_gravity_direction == 'left':
             # Rotate controls left
             self.controls = [self.controls_original[3], self.controls_original[0], self.controls_original[1], self.controls_original[2]]
-        elif gravity_direction == 'right':
+        elif new_gravity_direction == 'right':
             # Rotate controls right
             self.controls = [self.controls_original[1], self.controls_original[2], self.controls_original[3], self.controls_original[0]]
         else:

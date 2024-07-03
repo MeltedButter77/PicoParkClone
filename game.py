@@ -21,7 +21,10 @@ def load_level(game, level_info):
                 controls = [pg.K_i, pg.K_j, pg.K_k, pg.K_l]
 
             if controls:
-                player.Player(game, (info["x"], info["y"]), (info["width"], info["height"]), controls, game.players)
+                gravity = "down"
+                if i == 0:
+                    gravity = "up"
+                player.Player(game, (info["x"], info["y"]), (info["width"], info["height"]), gravity, controls, game.players)
             else:
                 print("not enough controls defined for player", i + 1)
 
