@@ -3,14 +3,20 @@ import os
 import pygame as pg
 
 
+def sum_vector(vectors):
+    sum_v = pg.Vector2(0, 0)
+    for vector in vectors:
+        sum_v += vector
+    return sum_v
+
+
 class PushBlock(pg.sprite.Sprite):
     def __init__(self, game, info, *groups):
         super().__init__(*groups)
         self.game = game
 
         # Perma variables
-        self.push_speed = 150
-        self.push_amount = info['push_amount']
+        self.push_speed_multiplier = 0.5
 
         # Gravity dependant perma variables
         gravity_direction = "down"
@@ -18,8 +24,12 @@ class PushBlock(pg.sprite.Sprite):
 
         # Changing Variables
         self.pos = pg.Vector2(info['x'], info['y'])
-        self.gravity_vel = pg.Vector2(0, 0)
         size = (info['width'], info['height'])
+        self.velocity = {
+            "gravity": pg.Vector2(0, 0),
+            "movement": pg.Vector2(0, 0),
+            "standing_on": pg.Vector2(0, 0),
+        }
 
         # Dictionary mapping gravity directions to (gravity_vec, move_vec, jump_vec)
         self.directions = {
@@ -48,10 +58,12 @@ class PushBlock(pg.sprite.Sprite):
 
     def update(self):
         # Apply Gravity
-        self.gravity_vel += self.gravity_vec * self.game.dt
+        self.velocity["gravity"] += self.gravity_vec
 
         # Apply velocity accounting for dt
-        self.pos += self.gravity_vel * self.game.dt
+        velocity = self.velocity["gravity"] + self.velocity["movement"]
+        self.pos += velocity * self.game.dt
+        self.velocity["movement"] *= 0
 
         # Update rect
         self.rect.topleft = self.pos
@@ -76,44 +88,41 @@ class PushBlock(pg.sprite.Sprite):
             if (self.rect.bottom > collided_obj.rect.top >= self.old_rect.bottom and
                     self.rect.right > collided_obj.rect.left and self.rect.left < collided_obj.rect.right):
                 self.rect.bottom = collided_obj.rect.top
-                self.gravity_vel.y = min(self.gravity_vel.y, 0)
+                self.velocity["gravity"].y = min(self.velocity["gravity"].y, 0)
 
             # if rect.top is higher than wall bottom and old_rect.top is lower than rect bottom
             if (self.rect.top < collided_obj.rect.bottom <= self.old_rect.top and
                     self.rect.right > collided_obj.rect.left and self.rect.left < collided_obj.rect.right):
                 self.rect.top = collided_obj.rect.bottom
-                self.gravity_vel.y = max(self.gravity_vel.y, 0)
+                self.velocity["gravity"].y = max(self.velocity["gravity"].y, 0)
 
             if (self.rect.right > collided_obj.rect.left >= self.old_rect.right and
                     self.rect.bottom > collided_obj.rect.top and self.rect.top < collided_obj.rect.bottom):
                 self.rect.right = collided_obj.rect.left
-                self.gravity_vel.x = min(self.gravity_vel.x, 0)
+                self.velocity["gravity"].x = min(self.velocity["gravity"].x, 0)
 
             if (self.rect.left < collided_obj.rect.right <= self.old_rect.left and
                     self.rect.bottom > collided_obj.rect.top and self.rect.top < collided_obj.rect.bottom):
                 self.rect.left = collided_obj.rect.right
-                self.gravity_vel.x = max(self.gravity_vel.x, 0)
+                self.velocity["gravity"].x = max(self.velocity["gravity"].x, 0)
 
             # Update pos attribute, as the rect was moved to the correct position
             self.pos = pg.Vector2(self.rect.topleft)
 
         self.old_rect = self.rect.copy()
 
-    def push(self, direction):
+    def push(self, pushing_object, direction):
+
         if direction == "right":
-            self.pos.x += self.push_speed * self.game.dt
+            self.velocity["movement"] = sum_vector(pushing_object.velocity.values()) * self.push_speed_multiplier
         elif direction == "left":
-            self.pos.x -= self.push_speed * self.game.dt
+            self.velocity["movement"] = sum_vector(pushing_object.velocity.values()) * self.push_speed_multiplier
         if direction == "down":
-            self.pos.y += self.push_speed * self.game.dt
+            self.velocity["movement"] = sum_vector(pushing_object.velocity.values()) * self.push_speed_multiplier
         elif direction == "up":
-            self.pos.y -= self.push_speed * self.game.dt
+            self.velocity["movement"] = sum_vector(pushing_object.velocity.values()) * self.push_speed_multiplier
 
     def draw(self, screen):
         location = [self.rect[i] - self.game.camera[i] for i in range(2)]
         screen.blit(self.image, location)
 
-
-def create_object(game, obj_info):
-    if obj_info['type'] == 'push_block':
-        PushBlock(game, obj_info, game.blocks)
